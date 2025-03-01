@@ -1,0 +1,10 @@
+Confusion Matrix:
+""	"0"	"1"
+"0"	83	19
+"1"	17	35
+
+Accuracy:  0.7662338 
+Sensitivity:  0.83 
+Specificity:  0.6481481 
+
+AUC:  0.7390741 
