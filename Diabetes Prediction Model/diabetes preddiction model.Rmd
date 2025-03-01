@@ -1,0 +1,88 @@
+---
+title: "Diabetes Prediction Model"
+author: "ghaff24"
+date: "2025-03-01"
+output: pdf_document
+---
+# Install and load necessary packages
+
+install.packages("caTools")     # For splitting data
+install.packages("caret")       # For model training
+install.packages("randomForest")     # For Random Forest model
+install.packages("e1071")      # For SVM and other machine learning tools
+install.packages("pROC")       # For ROC curve
+
+library(caTools)
+library(caret)
+library(randomForest)
+library(e1071)
+library(pROC)
+
+# Load the dataset 
+
+diabetes_data <- read.csv("diabetes.csv")
+
+# Check the first few rows of the data
+
+head(diabetes_data)
+
+# Preprocessing: Check for missing values
+
+sum(is.na(diabetes_data))
+
+
+
+# Split data into training (80%) and testing (20%) sets
+
+set.seed(123)  # Setting seed for reproducibility
+
+split <- sample.split(diabetes_data$Outcome, SplitRatio = 0.8)
+train_data <- subset(diabetes_data, split == TRUE)
+test_data <- subset(diabetes_data, split == FALSE)
+
+# Ensure that 'Outcome' in both the test data and predictions are factors with the same levels
+
+train_data$Outcome <- factor(train_data$Outcome, levels = c(0, 1))  # 0 = No, 1 = Yes
+test_data$Outcome <- factor(test_data$Outcome, levels = c(0, 1))  # 0 = No, 1 = Yes
+
+# Train a Random Forest model
+
+model_rf <- randomForest(Outcome ~ ., data = train_data)
+
+# Print the model summary
+
+print(model_rf)
+
+# Predict on the test data
+
+predictions <- predict(model_rf, newdata = test_data)
+
+# Ensure the predictions are factors with the same levels as 'Outcome'
+
+predictions <- factor(predictions, levels = c(0, 1))  # Ensure same levels as Outcome
+
+# Now calculate the confusion matrix
+
+conf_matrix <- confusionMatrix(predictions, test_data$Outcome)
+
+# Print confusion matrix and performance metrics
+
+print(conf_matrix)
+
+# Model performance metrics (Accuracy, Sensitivity, Specificity)
+
+accuracy <- conf_matrix$overall['Accuracy']
+sensitivity <- conf_matrix$byClass['Sensitivity']
+specificity <- conf_matrix$byClass['Specificity']
+auc_value <- auc(roc_curve)
+
+cat("Accuracy: ", accuracy, "\n")
+cat("AUC: ", auc_value, "\n")
+cat("Sensitivity: ", sensitivity, "\n")
+cat("Specificity: ", specificity, "\n")
+
+# You can also plot the ROC curve
+
+roc_curve <- roc(test_data$Outcome, as.numeric(predictions))
+plot(roc_curve, main = "ROC Curve for Diabetes Prediction", col = "blue")
+
